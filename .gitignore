@@ -1,0 +1,9 @@
+# dirs 
+
+/bin
+/obj
+
+# ext
+
+*.exe
+*.obj
