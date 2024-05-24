@@ -3,9 +3,6 @@
 
 // OpenCL includes
 #include <CL/cl.h>
-void CL_CALLBACK ErrorCallback(const char* errinfo, const void* private_info, size_t cb, void* user_data) {
-    printf_s("error occured %u\n", *errinfo);
-}
 
 int main()
 {
@@ -15,7 +12,7 @@ int main()
     CL_err = clGetPlatformIDs(1, &platform, NULL);
  
     if (CL_err != CL_SUCCESS) {
-        printf_s("no platforms\n");
+        printf("no platforms\n");
         return 0;
     }
 
@@ -25,23 +22,21 @@ int main()
     CL_err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &num_devices);
 
     if (CL_err != CL_SUCCESS) {
-        printf_s("no devices\n");
+        printf("no devices\n");
         return 0;
     }
 
-    printf_s("device count:%u. device id:%u\n", num_devices, device);
-
-    cl_context context = clCreateContext(NULL, 1, &device, ErrorCallback, NULL, &CL_err);
+    cl_context context = clCreateContext(NULL, 1, &device, NULL, NULL, &CL_err);
 
     if (CL_err != CL_SUCCESS) {
-        printf_s("error creating context. code %u\n", CL_err);
+        printf("error creating context\n");
         return 0;
     }
     
     CL_err = clGetContextInfo(context, CL_CONTEXT_DEVICES, sizeof(cl_device_id), &device, NULL);
 
     if (CL_err != CL_SUCCESS) {
-        printf_s("error in context info retrive. code %i\n", CL_err);
+        printf("error in context info retrive.\n");
         return 0;
     }
     
@@ -49,13 +44,71 @@ int main()
     CL_err = clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
 
     if (CL_err != CL_SUCCESS) {
-        printf_s("error when retrieving device info\n");
+        printf("error when retrieving device info\n");
+        return 0;
+    }
+    
+    char data[] = "__kernel void multiply(global const int* a, global const int* b, global int* c) { c[get_global_id(0)]=a[get_global_id(0)]*b[get_global_id(0)]; }";
+
+    char* source[] = { data };
+
+    cl_program program = clCreateProgramWithSource(
+            context,
+            1,
+            source,
+            0,
+            &CL_err);
+
+    if (CL_err != CL_SUCCESS) {
+        printf("error creating program\n");
         return 0;
     }
 
-    printf_s("device %zu, workgroup size: %zu\n", 0, work_group_size);
-    
+    char kernel_name[] = "multiply";
+    cl_kernel kernel = clCreateKernel(program, kernel_name, &CL_err);
+    if (CL_err != CL_SUCCESS) {
+        
+        switch (CL_err) {
+            case CL_INVALID_PROGRAM:
+            printf("CL_INVALID_PROGRAM\n");
+            break;
+            case CL_INVALID_PROGRAM_EXECUTABLE:
+            printf("CL_INVALID_PROGRAM_EXECUTABLE\n");
+            break;
+            case CL_INVALID_KERNEL_NAME:
+            printf("CL_INVALID_KERNEL_NAME\n");
+            break;
+            case CL_INVALID_KERNEL_DEFINITION:
+            printf("CL_INVALID_KERNEL_DEFINITION\n");
+            break;
+            case CL_INVALID_VALUE:
+            printf("CL_INVALID_VALUE\n");
+            break;
+            case CL_OUT_OF_RESOURCES:
+            printf("CL_OUT_OF_RESOURCES\n");
+            break;
+            case CL_OUT_OF_HOST_MEMORY:
+            printf("CL_OUT_OF_HOST_MEMORY\n");
+            break;
+            default:
+            printf("error creating kernel in program\n");
+                break;
+        
+        }
+
+        if (CL_err == CL_INVALID_KERNEL_NAME) {
+        }
+        return 0;
+    }
+
+    CL_err = clBuildProgram(program, 1, &device, "", NULL, NULL);
+
+    if (CL_err != CL_SUCCESS) {
+        printf("error building program\n");
+        return 0;
+    }
+
+
     clReleaseContext(context);
     return 0;
 }
-
