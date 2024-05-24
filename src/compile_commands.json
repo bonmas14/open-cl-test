@@ -1,7 +1,0 @@
-[
-  {
-    "arguments": [
-      "-I..\\..\\OpenCL-SDK\\install\\include\\",
-    ],
-  }
-]
