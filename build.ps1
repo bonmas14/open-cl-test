@@ -7,6 +7,7 @@ $obj_path = "obj"
 
 if (!(Test-Path -Path .\$bin_path)) {
     New-Item -Path . -Name $bin_path -ItemType "directory" 
+    Copy-Item -Path ".\runtime\" -Destination "$bin_path\runtime\" -Recurse
 }
 if (!(Test-Path -Path .\$obj_path)) {
     New-Item -Path . -Name $obj_path -ItemType "directory" 
