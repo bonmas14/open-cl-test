@@ -48,7 +48,7 @@ int main()
         return 0;
     }
     
-    char data[] = "__kernel void multiply(global const int* a, global const int* b, global int* c) { c[get_global_id(0)]=a[get_global_id(0)]*b[get_global_id(0)]; }";
+    char data[] = "__kernel void multiply_krnl(global const int* a, global const int* b, global int* c) { c[get_global_id(0)]=a[get_global_id(0)]*b[get_global_id(0)]; }";
 
     char* source[] = { data };
 
@@ -56,48 +56,11 @@ int main()
             context,
             1,
             source,
-            0,
+            NULL,
             &CL_err);
 
     if (CL_err != CL_SUCCESS) {
         printf("error creating program\n");
-        return 0;
-    }
-
-    char kernel_name[] = "multiply";
-    cl_kernel kernel = clCreateKernel(program, kernel_name, &CL_err);
-    if (CL_err != CL_SUCCESS) {
-        
-        switch (CL_err) {
-            case CL_INVALID_PROGRAM:
-            printf("CL_INVALID_PROGRAM\n");
-            break;
-            case CL_INVALID_PROGRAM_EXECUTABLE:
-            printf("CL_INVALID_PROGRAM_EXECUTABLE\n");
-            break;
-            case CL_INVALID_KERNEL_NAME:
-            printf("CL_INVALID_KERNEL_NAME\n");
-            break;
-            case CL_INVALID_KERNEL_DEFINITION:
-            printf("CL_INVALID_KERNEL_DEFINITION\n");
-            break;
-            case CL_INVALID_VALUE:
-            printf("CL_INVALID_VALUE\n");
-            break;
-            case CL_OUT_OF_RESOURCES:
-            printf("CL_OUT_OF_RESOURCES\n");
-            break;
-            case CL_OUT_OF_HOST_MEMORY:
-            printf("CL_OUT_OF_HOST_MEMORY\n");
-            break;
-            default:
-            printf("error creating kernel in program\n");
-                break;
-        
-        }
-
-        if (CL_err == CL_INVALID_KERNEL_NAME) {
-        }
         return 0;
     }
 
@@ -108,6 +71,13 @@ int main()
         return 0;
     }
 
+    char kernel_name[] = "multiply_krnl";
+    cl_kernel kernel = clCreateKernel(program, kernel_name, &CL_err);
+
+    if (CL_err != CL_SUCCESS) {
+        printf("error creating kernel in program\n");
+
+    }
 
     clReleaseContext(context);
     return 0;
